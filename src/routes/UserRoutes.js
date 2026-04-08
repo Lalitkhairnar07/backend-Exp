@@ -5,6 +5,6 @@ router.get("/",userController.getAllUsers)
 router.post("/",userController.createUser)
 router.delete("/:id",userController.deleteUser)
 
-// router.post("/login",userController.loginUser)
+router.post("/login",userController.loginUser)
 
 module.exports = router

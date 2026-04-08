@@ -7,8 +7,8 @@ const userRoutes = require("./src/routes/UserRoutes")
 app.use("/user",userRoutes)
 
 
-// const expCategoryRoutes = require("./src/routes/ExpCategoryRoutes")
-// app.use("/expCat",expCategoryRoutes)
+const expCategoryRoutes = require("./src/routes/ExpCategoryRoutes")
+app.use("/expenseCategory",expCategoryRoutes)
 
 
 //DBCONNECTION:

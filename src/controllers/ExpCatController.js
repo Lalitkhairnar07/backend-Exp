@@ -40,6 +40,7 @@ const getExpensecategoriesByUserId = async (req, res) => {
     }
 
 }
+
 module.exports = {
     createExpenseCategory,
     getExpensecategoriesByUserId

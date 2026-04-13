@@ -9,11 +9,11 @@ const mailSend = async (to, subject, text) => {
     },
   });
   const mailOptions = {
-    to:to,
-    from:"khairnarlalit08@gmail.com",
-    subject:subject,
+    to: to,
+    from: "khairnarlalit08@gmail.com",
+    subject: subject,
     //text:text
-    html:`<h1>${text}</h1>`
+    html: `<h1>${text}</h1>`
   };
 
   await transport.sendMail(mailOptions)

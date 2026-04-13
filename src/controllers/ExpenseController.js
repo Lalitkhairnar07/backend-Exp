@@ -38,4 +38,5 @@ const getExpesneByUserId = async (req, res) => {
 module.exports = {
     createExpense,
     getExpesneByUserId
+    
 }

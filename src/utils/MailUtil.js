@@ -19,4 +19,5 @@ const mailSend = async (to, subject, text) => {
   await transport.sendMail(mailOptions)
 
 };
+
 module.exports = mailSend

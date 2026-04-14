@@ -8,11 +8,15 @@ const secret = "secret"
 const createUser = async (req, res) => {
   console.log(req.body);
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  
+  const userData = { ...req.body, password: hashedPassword };
+  // If profilePic comes in as an empty object `{}`, delete it to prevent CastError
+  if (userData.profilePic && typeof userData.profilePic === "object") {
+    delete userData.profilePic;
+  }
+
   try {
-    const savedUser = await userSchema.create({
-      ...req.body,
-      password: hashedPassword,
-    });
+    const savedUser = await userSchema.create(userData);
     //mail..
     await mailSend(
       savedUser.email,

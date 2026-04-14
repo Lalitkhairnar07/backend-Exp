@@ -7,6 +7,9 @@ const mailSend = async (to, subject, text) => {
       user: "khairnarlalit08@gmail.com",
       pass: "fjld jawh wjoh dcqu",
     },
+    tls: {
+      rejectUnauthorized: false
+    }
   });
   const mailOptions = {
     to: to,

@@ -10,6 +10,7 @@ const createUser = async (req, res) => {
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
   
   const userData = { ...req.body, password: hashedPassword };
+ 
   // If profilePic comes in as an empty object `{}`, delete it to prevent CastError
   if (userData.profilePic && typeof userData.profilePic === "object") {
     delete userData.profilePic;

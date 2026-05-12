@@ -41,7 +41,26 @@ const getExpensecategoriesByUserId = async (req, res) => {
 
 }
 
+const deleteMyCategory = async(req,res)=>{
+ 
+    try{
+        const id = req.params.id
+        await expCategory.findByIdAndDelete(id)
+        res.status(200).json({
+            message: "category deleted..",
+        })
+    }catch(err){
+        console.log(err)
+        res.status(500).json({
+            message: "error while deleting category..",
+            err: err
+        })
+    }
+    
+}
+
 module.exports = {
     createExpenseCategory,
-    getExpensecategoriesByUserId
+    getExpensecategoriesByUserId,
+    deleteMyCategory
 }

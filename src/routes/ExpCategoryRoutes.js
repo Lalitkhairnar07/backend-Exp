@@ -4,5 +4,6 @@ const authMiddleware =require("../middleware/AuthMiddleware")
 
 router.post("/",authMiddleware,categoryController.createExpenseCategory)
 router.get("/get",authMiddleware,categoryController.getExpensecategoriesByUserId)
+router.delete("/:id",authMiddleware,categoryController.deleteMyCategory)
 
 module.exports = router

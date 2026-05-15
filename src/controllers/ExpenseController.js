@@ -99,27 +99,34 @@ const serachExpesneByUserId = async (req,res)=>{
 
 const uploadExpenseReceipt = async(req,res)=>{
     
-    const expId = req.body.expenseId
+    const expId = req.body.expId || req.body.expenseId
     const file = req.file
 
-    //clodudiary upload --> req.file.path
-    //return cloudinaryResponse --> secure_url
-    try
-    {
-    const cloudinaryResponse = await uploadFileToCloudinary(req.file.path)
-    const updateExp = await expenseModel.findByIdAndUpdate(expId,{expReceipt:cloudinaryResponse.secure_url})
-    res.status(200).json({
-        message:"Expense receipt uploaded successfully",
-        data:updateExp
-    })
+    if (!expId) {
+        return res.status(400).json({
+            message: "Expense ID is required"
+        })
     }
-    catch(err)
-    {
+
+    if (!file) {
+        return res.status(400).json({
+            message: "File is required"
+        })
+    }
+
+    try {
+        const cloudinaryResponse = await uploadFileToCloudinary(file.path)
+        const updateExp = await expenseModel.findByIdAndUpdate(expId, { expReceipt: cloudinaryResponse.secure_url })
+        res.status(200).json({
+            message: "Expense receipt uploaded successfully",
+            data: updateExp
+        })
+    } catch (err) {
         res.status(500).json({
-        message:"expense receipt is not uploaded",
-        err:err
-    })
-    } 
+            message: "Expense receipt is not uploaded",
+            err: err.message
+        })
+    }
 }
 
 module.exports = {

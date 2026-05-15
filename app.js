@@ -13,11 +13,11 @@ app.use("/user",userRoutes)
 const expCategoryRoutes = require("./src/routes/ExpCategoryRoutes")
 app.use("/expenseCategory",expCategoryRoutes)
 
-// const expenseRoutes = require("./src/routes/ExpenseRoutes")
-// app.use("/exp",expenseRoutes)
-
 const expenseRoutes = require("./src/routes/ExpenseRoutes")
 app.use("/exp",expenseRoutes)
+
+const incomeCategoryRoutes = require("./src/routes/IncomeCategoryRoutes")
+app.use("/incomeCat",incomeCategoryRoutes)
 
 
 //DBCONNECTION:

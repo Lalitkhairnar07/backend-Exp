@@ -8,9 +8,9 @@ const secret = "secret"
 const createUser = async (req, res) => {
   console.log(req.body);
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
-  
+
   const userData = { ...req.body, password: hashedPassword };
- 
+
   // If profilePic comes in as an empty object `{}`, delete it to prevent CastError
   if (userData.profilePic && typeof userData.profilePic === "object") {
     delete userData.profilePic;
@@ -114,12 +114,33 @@ const loginUser = async (req, res) => {
 
 }
 
+
+const getUserById = async (req, res) => {
+
+  const userId = req.user._id
+  const foundUser = await userSchema.findById(userId)
+  if (foundUser) {
+    res.status(200).json({
+      message: "user found..",
+      user: foundUser
+    })
+  }
+
+  else {
+    res.status(404).json({
+      message: "user not found..",
+    })
+  }
+
+}
+
 module.exports = {
 
   createUser,
   getAllUsers,
   deleteUser,
-  loginUser
+  loginUser,
+  getUserById
 
 }
 

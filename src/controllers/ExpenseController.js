@@ -32,7 +32,19 @@ const getExpesneByUserId = async (req, res) => {
     try {
 
         const userId = req.user._id
-        const expenses = await expenseModel.find({ userId: userId }).populate("expCategory")
+        var sort = req.query.sort || 1;
+        sort = parseInt(sort);
+        var datesort = req.query.date || 1
+        datesort = parseInt(datesort);
+        console.log(datesort)
+        const type = req.query.type || "expense"
+        let expenses;
+
+        if (type == "expense") {
+            expenses = await expenseModel.find({ userId: userId, income: { $exists: false } }).select(["title", "description", "amount", "expenseDate", "paymentMode", "expCategory"]).sort({ amount: sort, createdAt: sort }).populate("expCategory")
+        } else {
+            expenses = await expenseModel.find({ userId: userId, income: { $exists: true } }).select(["title", "description", "income", "expenseDate", "paymentMode", "incomeCategory"]).sort({ income: sort, createdAt: sort }).populate("incomeCategory")
+        }
         res.status(200).json({
             message: "Expenses fetched successfully",
             data: expenses
@@ -45,60 +57,70 @@ const getExpesneByUserId = async (req, res) => {
     }
 }
 
-const deleteMyExpense= async(req,res)=>{
+const deleteMyExpense = async (req, res) => {
     await expenseModel.findByIdAndDelete(req.params.id)
 
-    try
-    {
+    try {
         res.status(201).json({
-            message:"expense deleted successfully",
-            data:expenseModel
+            message: "expense deleted successfully",
+            data: expenseModel
         })
     }
-    catch(err)
-    {
+    catch (err) {
         res.status(500).json({
-        message:"expense is not deleted",
-        err:err
-    })
-    } 
-} 
+            message: "expense is not deleted",
+            err: err
+        })
+    }
+}
 
-const serachExpesneByUserId = async (req,res)=>{
-    
+const serachExpesneByUserId = async (req, res) => {
+
     const userId = req.user._id
     const expName = req.query.expName || ""
     var expAmount = req.query.expAmount || ""
-    var query = {}
+    const type = req.query.type || "expense"
+    var query = { userId: userId }
 
-    if(expAmount){
-        expAmount =  parseInt(expAmount)
-        query = {expAmount:expAmount}
+    if (type === "expense") {
+        query.income = { $exists: false }
+    } else {
+        query.income = { $exists: true }
     }
-    
-    try{
-    const expenses = await expenseModel.find({userId:userId,
-        $or:[{title:{$regex:expName,$options:"i"}},
-            {description:{$regex:expName,$options:"i"}},
-            
-        ]
-    }).populate("expCategory")
 
-    res.status(200).json({
-        message:"Expenses searched successfully",
-        data:expenses
-    })
-    }catch(err)
-    {
+    if (expAmount) {
+        expAmount = parseInt(expAmount)
+        if (type === "expense") {
+            query.amount = expAmount
+        } else {
+            query.income = expAmount
+        }
+    }
+
+    if (expName) {
+        query.$or = [
+            { title: { $regex: expName, $options: "i" } },
+            { description: { $regex: expName, $options: "i" } }
+        ]
+    }
+
+    try {
+        const expenses = await expenseModel.find(query).populate(type === "expense" ? "expCategory" : "incomeCategory")
+
+        res.status(200).json({
+            message: "Expenses searched successfully",
+            data: expenses
+        })
+    } catch (err) {
         res.status(500).json({
-        message:"expense is not searched",
-        err:err
-    })
-    } 
+            message: "expense is not searched",
+            err: err
+        })
+    }
 }
 
-const uploadExpenseReceipt = async(req,res)=>{
-    
+const uploadExpenseReceipt = async (req, res) => {
+
     const expId = req.body.expId || req.body.expenseId
     const file = req.file
 
@@ -135,5 +157,5 @@ module.exports = {
     deleteMyExpense,
     serachExpesneByUserId,
     uploadExpenseReceipt
-    
+
 }

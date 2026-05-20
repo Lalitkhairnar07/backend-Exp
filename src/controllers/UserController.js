@@ -2,6 +2,7 @@ const userSchema = require("../models/UserModel")
 const bcrypt = require("bcrypt")
 const mailSend = require("../utils/MailUtil")
 const jwt = require("jsonwebtoken")
+const uploadFileToCloudinary = require("../utils/CloudinaryUtil")
 const secret = "secret"
 
 
@@ -134,13 +135,51 @@ const getUserById = async (req, res) => {
 
 }
 
+const uploadProfilePic = async (req,res) =>{
+
+  try{
+    const userId = req.user._id
+    const file = req.file
+
+    if (!file) {
+        return res.status(400).json({
+            message: "No file uploaded"
+        })
+    }
+
+    const user = await userSchema.findById(userId)
+    if(user){
+      const cloudinaryResponse = await uploadFileToCloudinary(file.path)
+      user.profilePic = cloudinaryResponse.secure_url
+      await user.save()
+      res.status(200).json({
+        message: "profile picture uploaded successfully..",
+        user: user
+      })
+    }else{
+      res.status(404).json({
+        message: "user not found..",
+      })
+    }
+  }
+  catch(err){
+    console.error("Cloudinary upload error:", err);
+    res.status(500).json({
+      message: "error while uploading profile picture..",
+      err: err.message || err
+    })
+  }
+
+}
+
 module.exports = {
 
   createUser,
   getAllUsers,
   deleteUser,
   loginUser,
-  getUserById
+  getUserById,
+  uploadProfilePic
 
 }
 

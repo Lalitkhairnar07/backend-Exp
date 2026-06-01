@@ -15,7 +15,8 @@ const createExpense = async (req, res) => {
         }
 
         const savedExpense = await expenseModel.create(expenseData)
-        sendNotification(req.user,["expenditure added successfully"],0,"expenditure_added","email")
+        // sendNotification(req.user,["expenditure added successfully"],0,"expenditure_added","email")
+        sendNotification("expense_created",savedExpense)
         res.status(201).json({
             message: "Expense created successfully",
             data: savedExpense

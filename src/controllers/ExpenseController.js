@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 const expenseModel = require("../models/ExpenseModel")
 const uploadFileToCloudinary = require("../utils/CloudinaryUtil")
+const {sendNotification} = require("../service/NotificationService")
 
 const createExpense = async (req, res) => {
     try {
@@ -14,6 +15,7 @@ const createExpense = async (req, res) => {
         }
 
         const savedExpense = await expenseModel.create(expenseData)
+        sendNotification(req.user,["expenditure added successfully"],0,"expenditure_added","email")
         res.status(201).json({
             message: "Expense created successfully",
             data: savedExpense

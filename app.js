@@ -37,7 +37,7 @@ const { initCronJobs } = require("./src/service/CronService")
 initCronJobs()
 
 //server creation..
-const PORT = 3000
+const PORT = process.env.PORT
 app.listen(PORT,()=>{
     console.log(`server started on port ${PORT}`)
 })

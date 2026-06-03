@@ -33,8 +33,8 @@ const DBConnection = require("./src/utils/DBConnection")
 DBConnection()
 
 //CRON JOBS INITIALIZATION:
-const { initCronJobs } = require("./src/service/CronService")
-initCronJobs()
+// const { initCronJobs } = require("./src/service/CronService")
+// initCronJobs()
 
 //server creation..
 const PORT = process.env.PORT

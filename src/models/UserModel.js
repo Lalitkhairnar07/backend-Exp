@@ -31,6 +31,9 @@ const userSchema = new Schema({
         type:String,
         enum:["Active","Not Active"],
         default:"Active"
+    },
+    otp:{
+        type:Number
     }
 },{timestamps:true})
 

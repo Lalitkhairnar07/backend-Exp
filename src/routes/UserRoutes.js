@@ -12,4 +12,7 @@ router.get("/me",authMiddleware,userController.getUserById)
 
 router.put("/profilePic",authMiddleware,upload.single("image"),userController.uploadProfilePic)
 
+router.post("/forgotPassword",userController.forgotPassword)
+router.post("/resetPassword",userController.resetPassword)
+
 module.exports = router

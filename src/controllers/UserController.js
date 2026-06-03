@@ -135,20 +135,20 @@ const getUserById = async (req, res) => {
 
 }
 
-const uploadProfilePic = async (req,res) =>{
+const uploadProfilePic = async (req, res) => {
 
-  try{
+  try {
     const userId = req.user._id
     const file = req.file
 
     if (!file) {
-        return res.status(400).json({
-            message: "No file uploaded"
-        })
+      return res.status(400).json({
+        message: "No file uploaded"
+      })
     }
 
     const user = await userSchema.findById(userId)
-    if(user){
+    if (user) {
       const cloudinaryResponse = await uploadFileToCloudinary(file.path)
       user.profilePic = cloudinaryResponse.secure_url
       await user.save()
@@ -156,13 +156,13 @@ const uploadProfilePic = async (req,res) =>{
         message: "profile picture uploaded successfully..",
         user: user
       })
-    }else{
+    } else {
       res.status(404).json({
         message: "user not found..",
       })
     }
   }
-  catch(err){
+  catch (err) {
     console.error("Cloudinary upload error:", err);
     res.status(500).json({
       message: "error while uploading profile picture..",
@@ -172,6 +172,60 @@ const uploadProfilePic = async (req,res) =>{
 
 }
 
+// forgot password
+const forgotPassword = async (req, res) => {
+
+  const { email } = req.body
+  const user = await userSchema.findOne({ email })
+  if (user) {
+    const otp = Math.floor(1000 + Math.random() * 9000)
+    user.otp = otp
+    await user.save()
+    await mailSend(email, "Forgot Password", `Your OTP is ${otp}`)
+    res.status(200).json({
+      message: "OTP sent successfully..",
+    })
+  } else {
+    res.status(404).json({
+      message: "user not found..",
+    })
+  }
+
+}
+
+const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body
+  try {
+    const user = await userSchema.findOne({ email })
+    if (!user) {
+      return res.status(404).json({
+        message: "user not found..",
+      })
+    }
+
+    if (!user.otp || Number(user.otp) !== Number(otp)) {
+      return res.status(400).json({
+        message: "invalid OTP..",
+      })
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    user.password = hashedPassword
+    user.otp = undefined
+    await user.save()
+
+    res.status(200).json({
+      message: "password reset successfully..",
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({
+      message: "error while resetting password..",
+      err: err.message || err,
+    })
+  }
+}
+
 module.exports = {
 
   createUser,
@@ -179,7 +233,9 @@ module.exports = {
   deleteUser,
   loginUser,
   getUserById,
-  uploadProfilePic
+  uploadProfilePic,
+  forgotPassword,
+  resetPassword
 
 }
 

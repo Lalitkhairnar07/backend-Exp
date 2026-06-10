@@ -8,23 +8,35 @@ const secret = "secret"
 
 const createUser = async (req, res) => {
   console.log(req.body);
-  const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  const { email, password } = req.body;
 
-  const userData = { ...req.body, password: hashedPassword };
-
-  // If profilePic comes in as an empty object `{}`, delete it to prevent CastError
-  if (userData.profilePic && typeof userData.profilePic === "object") {
-    delete userData.profilePic;
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "Email and password are required.",
+    });
   }
 
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userData = { ...req.body, password: hashedPassword };
+
+    // If profilePic comes in as an empty object `{}`, delete it to prevent CastError
+    if (userData.profilePic && typeof userData.profilePic === "object") {
+      delete userData.profilePic;
+    }
+
     const savedUser = await userSchema.create(userData);
     //mail..
-    await mailSend(
-      savedUser.email,
-      "Welcome Mail",
-      "Welcome to expense manager app",
-    );
+    try {
+      await mailSend(
+        savedUser.email,
+        "Welcome Mail",
+        "Welcome to expense manager app",
+      );
+    } catch (mailErr) {
+      console.error("Welcome email failed to send:", mailErr);
+    }
+
     if (savedUser) {
       res.status(201).json({
         message: "user created..",
@@ -35,7 +47,7 @@ const createUser = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({
       message: "error while creating user..",
       error: err.message,
@@ -80,61 +92,72 @@ const deleteUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
+  const { email, password } = req.body;
 
-  const { email, password } = req.body
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "Email and password are required.",
+    });
+  }
+
   try {
-
-    const foundUserFromEmail = await userSchema.findOne({ email })
-    console.log(foundUserFromEmail)
+    const foundUserFromEmail = await userSchema.findOne({ email });
+    console.log(foundUserFromEmail);
     if (foundUserFromEmail) {
-
+      if (!foundUserFromEmail.password) {
+        return res.status(401).json({
+          message: "invalid credentials",
+        });
+      }
       //compare encrypted and plain passwoerd
       if (bcrypt.compareSync(password, foundUserFromEmail.password)) {
         //token generate..
-        const token = jwt.sign(foundUserFromEmail.toObject(), secret)
+        const token = jwt.sign(foundUserFromEmail.toObject(), secret);
         res.status(200).json({
           message: "user logged in..",
           // data:foundUserFromEmail,
           token: token
-        })
+        });
       } else {
         res.status(401).json({
           message: "invalid credentials",
-        })
+        });
       }
     } else {
       res.status(404).json({
         message: "user not found..",
-      })
+      });
     }
   } catch (err) {
     res.status(500).json({
       message: "error while logging in..",
-      err: err
-    })
+      err: err.message || err
+    });
   }
-
-}
+};
 
 
 const getUserById = async (req, res) => {
-
-  const userId = req.user._id
-  const foundUser = await userSchema.findById(userId)
-  if (foundUser) {
-    res.status(200).json({
-      message: "user found..",
-      user: foundUser
-    })
+  try {
+    const userId = req.user._id;
+    const foundUser = await userSchema.findById(userId);
+    if (foundUser) {
+      res.status(200).json({
+        message: "user found..",
+        user: foundUser
+      });
+    } else {
+      res.status(404).json({
+        message: "user not found..",
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      message: "error while fetching user by id..",
+      err: err.message || err
+    });
   }
-
-  else {
-    res.status(404).json({
-      message: "user not found..",
-    })
-  }
-
-}
+};
 
 const uploadProfilePic = async (req, res) => {
 
